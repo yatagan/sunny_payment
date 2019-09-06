@@ -9,7 +9,6 @@ Session = None
 
 
 def init(engine_uri):
-    print(engine_uri)
     engine = create_engine(engine_uri)
 
     global Session

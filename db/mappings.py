@@ -1,5 +1,8 @@
+import datetime
+import enum
+
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, String, Integer, Numeric, ForeignKey
+from sqlalchemy import Column, String, Integer, Numeric, ForeignKey, Date, DateTime, Enum
 from sqlalchemy.orm import relationship
 
 
@@ -27,3 +30,33 @@ class Wallet(Base):
 
 
 Client.wallet = relationship("Wallet", uselist=False, back_populates="client")
+
+
+class CurrencyRate(Base):
+    __tablename__ = 'currency_rate'
+
+    date = Column(Date, primary_key=True)
+    currency = Column(String, primary_key=True)
+    rate = Column(Numeric)
+
+
+class TransactionTypeEnum(enum.Enum):
+    refill = 1
+    transfer = 2
+
+
+class TransactionLog(Base):
+    __tablename__ = 'transaction_logs'
+
+    id = Column(Integer, primary_key=True)
+    datetime = Column(DateTime, default=datetime.datetime.utcnow)
+    type = Column(Enum(TransactionTypeEnum))
+
+    wallet_id_from = Column(Integer, ForeignKey('wallets.id'))
+    wallet_id_to = Column(Integer, ForeignKey('wallets.id'))
+
+    wallet_from = relationship('Wallet', foreign_keys=[wallet_id_from])
+    wallet_to = relationship('Wallet', foreign_keys=[wallet_id_to])
+
+    amount = Column(Numeric)
+    exchange_rate = Column(Numeric)

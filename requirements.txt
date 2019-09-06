@@ -3,3 +3,4 @@ psycopg2==2.8.3
 pytest==5.1.2
 fastapi==0.38.1
 uvicorn==0.8.6
+requests==2.22.0

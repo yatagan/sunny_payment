@@ -1,6 +1,9 @@
 import decimal
 
-from db.mappings import Client, Wallet
+from db.mappings import Client, Wallet, CurrencyRate, TransactionLog
+
+
+CURRENCIES = {'USD', 'EUR', 'CAD', 'CNY'}
 
 
 def normalize_money(raw):
@@ -20,22 +23,20 @@ def register_client(session, name, country, city, currency):
     }
 
 
-def refill(session, client_id, amount):
-    if amount < 0:
-        raise ValueError("Amount can't be negative")
-
+def refill_wallet(session, client_id, amount):
     client = session.query(Client).filter(Client.id == client_id).one()
     client.wallet.balance += amount
+
+    log = TransactionLog(type='refill', wallet_to=client.wallet, amount=amount)
+    session.add(log)
+
     session.commit()
     return {
         'balance': client.wallet.balance,
     }
 
 
-def transfer(session, client_id_from, client_id_to, amount):
-    if amount < 0:
-        raise ValueError("Amount can't be negative")
-
+def transfer_money(session, client_id_from, client_id_to, amount):
     client_from = session.query(Client).filter(Client.id == client_id_from).one()
     client_to = session.query(Client).filter(Client.id == client_id_to).one()
 
@@ -47,7 +48,21 @@ def transfer(session, client_id_from, client_id_to, amount):
 
         client_from.wallet.balance -= amount
         client_to.wallet.balance += amount
+
+        log = TransactionLog(
+            type='transfer',
+            wallet_from=client_from.wallet,
+            wallet_to=client_to.wallet,
+            amount=amount
+        )
+        session.add(log)
+
         session.commit()
     else:
-        raise Exception('implement exchange')
+        pass
 
+
+def add_currency_rate(session, date, currency, rate):
+    currency_rate = CurrencyRate(date=date, currency=currency, rate=rate)
+    session.add(currency_rate)
+    session.commit()
