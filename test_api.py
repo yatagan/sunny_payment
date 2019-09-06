@@ -16,3 +16,9 @@ def test_register():
 
     assert response.status_code != 200
     assert response.json()['detail'][0]['msg'] == 'Invalid currency'
+
+
+# transfer
+# # negative amount
+# with pytest.raises(Exception):
+#     transfer_money(session, client1_id, client2_id, -100)

@@ -1,6 +1,6 @@
 $ pip install -r requirements.txt
 
-$ pytest --pep8
+$ pytest
 
 Create a database and set SQL_ENGINE_URI variable:
 

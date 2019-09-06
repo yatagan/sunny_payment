@@ -69,18 +69,17 @@ def test_transfer():
         assert client1.wallet.balance == 11
         assert client2.wallet.balance == 322
 
-        # negative amount
-        with pytest.raises(Exception):
-            transfer_money(session, client1_id, client2_id, -100)
-
         # not enough money
         with pytest.raises(Exception):
             transfer_money(session, client1_id, client2_id, 12)
 
-    # cross-currency transfer
+    # naive cross-currency transfer
     with db.session_scope() as session:
-        with pytest.raises(Exception):
-            transfer_money(session, client2_id, client3_id, 10)
+        transfer_money(session, client2_id, client3_id, 10)
 
     with db.session_scope() as session:
-        pass
+        client2 = session.query(Client).filter(Client.id == client2_id).one()
+        client3 = session.query(Client).filter(Client.id == client3_id).one()
+
+        assert client2.wallet.balance == 312
+        assert client3.wallet.balance == 343
